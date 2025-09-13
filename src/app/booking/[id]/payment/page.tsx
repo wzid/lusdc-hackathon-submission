@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { mockBookings, type Booking } from "@/lib/mock-data"
+import type { Listing, Profile } from "@/lib/types"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, CreditCard, Shield, Calendar, MapPin } from "lucide-react"
@@ -19,7 +19,18 @@ interface PaymentPageProps {
 }
 
 export default function PaymentPage({ params }: PaymentPageProps) {
-  const [booking, setBooking] = useState<Booking | null>(null)
+  interface BookingData {
+    id: number
+    itemId: number
+    renterId: string
+    startDate: number
+    endDate: number
+    totalPrice: number
+    status: string
+    item?: Listing
+    owner?: Profile
+  }
+  const [booking, setBooking] = useState<BookingData | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [paymentData, setPaymentData] = useState({
@@ -37,8 +48,14 @@ export default function PaymentPage({ params }: PaymentPageProps) {
 
   const fetchBooking = async () => {
     const { id } = await params
-    const mockBooking = mockBookings.find((b) => b.id === id)
-    setBooking(mockBooking || mockBookings[0] || null)
+    try {
+      const res = await fetch(`/api/bookings/${id}`)
+      const data = await res.json()
+      if (!res.ok || data.error) throw new Error(data.error ?? "Booking not found")
+      setBooking(data as BookingData)
+    } catch {
+      setBooking(null)
+    }
     setLoading(false)
   }
 
@@ -91,7 +108,7 @@ export default function PaymentPage({ params }: PaymentPageProps) {
         {/* Back Button */}
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/listing/${booking.listing?.id}`}>
+            <Link href={`/listing/${booking.item?.id ?? ""}`}> 
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Listing
             </Link>
@@ -162,7 +179,7 @@ export default function PaymentPage({ params }: PaymentPageProps) {
 
                     <div className="pt-4">
                       <Button type="submit" className="w-full" size="lg" disabled={processing}>
-                        {processing ? "Processing Payment..." : `Pay $${booking.total_amount.toFixed(2)}`}
+                        {processing ? "Processing Payment..." : `Pay $${booking.totalPrice?.toFixed(2) ?? "0.00"}`}
                       </Button>
                     </div>
                   </form>
@@ -197,10 +214,10 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                   <div className="flex gap-4">
                     <div className="w-20 h-16 bg-muted rounded-lg flex-shrink-0"></div>
                     <div className="space-y-1">
-                      <div className="font-semibold">{booking.listing?.title}</div>
+                      <div className="font-semibold">{booking.item?.name ?? "Unknown item"}</div>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="w-3 h-3" />
-                        {booking.listing?.location}
+                        {booking.item?.location ?? "Unknown location"}
                       </div>
                     </div>
                   </div>
@@ -214,11 +231,18 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                       <span className="font-medium">Rental Period</span>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {format(new Date(booking.start_date), "MMM dd, yyyy")} -{" "}
-                      {format(new Date(booking.end_date), "MMM dd, yyyy")}
+                      {booking.startDate && booking.endDate ? (
+                        <>
+                          {format(new Date(booking.startDate * 1000), "MMM dd, yyyy")} - {format(new Date(booking.endDate * 1000), "MMM dd, yyyy")}
+                        </>
+                      ) : "Dates unknown"}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {booking.total_days} {booking.total_days === 1 ? "day" : "days"}
+                      {booking.startDate && booking.endDate ? (
+                        <>
+                          {Math.max(1, Math.ceil((booking.endDate - booking.startDate) / 86400))} {Math.max(1, Math.ceil((booking.endDate - booking.startDate) / 86400)) === 1 ? "day" : "days"}
+                        </>
+                      ) : "Duration unknown"}
                     </div>
                   </div>
 
@@ -228,18 +252,18 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>
-                        ${booking.price_per_day} × {booking.total_days} days
+                        ${booking.item?.pricePerDay ?? 0} × {booking.startDate && booking.endDate ? Math.max(1, Math.ceil((booking.endDate - booking.startDate) / 86400)) : 0} days
                       </span>
-                      <span>${booking.subtotal.toFixed(2)}</span>
+                      <span>${booking.totalPrice?.toFixed(2) ?? "0.00"}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Service fee</span>
-                      <span>${booking.service_fee.toFixed(2)}</span>
+                      <span>${booking.totalPrice ? (booking.totalPrice * 0.15).toFixed(2) : "0.00"}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-semibold">
                       <span>Total</span>
-                      <span>${booking.total_amount.toFixed(2)}</span>
+                      <span>${booking.totalPrice ? (booking.totalPrice * 1.15).toFixed(2) : "0.00"}</span>
                     </div>
                   </div>
                 </CardContent>

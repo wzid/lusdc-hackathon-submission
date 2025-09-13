@@ -1,16 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { mockUser, type Listing } from "@/lib/mock-data"
 import { useRouter } from "next/navigation"
 import { CalendarIcon, Shield, AlertCircle, CreditCard } from "lucide-react"
 import { format, differenceInDays, isBefore, startOfDay } from "date-fns"
 import { cn } from "@/lib/utils"
+
+import { type Listing } from "@/lib/types"
 
 interface BookingCardProps {
   listing: Listing
@@ -20,19 +22,16 @@ export function BookingCard({ listing }: BookingCardProps) {
   const [startDate, setStartDate] = useState<Date>()
   const [endDate, setEndDate] = useState<Date>()
   const [isLoading, setIsLoading] = useState(false)
-  const [user, setUser] = useState<any>(null)
   const [bookedDates, setBookedDates] = useState<Date[]>([])
+  const [error, setError] = useState<string>("");
 
   const router = useRouter()
+  const { data: session } = useSession();
+  const user = session?.user;
 
   useEffect(() => {
-    checkUser()
     fetchBookedDates()
   }, [])
-
-  const checkUser = async () => {
-    setUser(mockUser)
-  }
 
   const fetchBookedDates = async () => {
     const dates: Date[] = []
@@ -44,7 +43,7 @@ export function BookingCard({ listing }: BookingCardProps) {
   }
 
   const totalDays = startDate && endDate ? differenceInDays(endDate, startDate) : 0
-  const subtotal = totalDays * listing.price_per_day
+  const subtotal = totalDays * listing.pricePerDay
   const serviceFee = subtotal * 0.15
   const total = subtotal + serviceFee
 
@@ -56,36 +55,46 @@ export function BookingCard({ listing }: BookingCardProps) {
   }
 
   const handleBooking = async () => {
+    
+
+    setError("");
     if (!user) {
-      router.push("/search")
-      return
+      setError("You must be logged in to book. Please sign in first.");
+      return;
     }
-
-    if (!startDate || !endDate) return
-
+    if (!startDate || !endDate) return;
     if (totalDays < listing.min_rental_days) {
-      alert(`Minimum rental period is ${listing.min_rental_days} days`)
-      return
+      alert(`Minimum rental period is ${listing.min_rental_days} days`);
+      return;
     }
-
     if (totalDays > listing.max_rental_days) {
-      alert(`Maximum rental period is ${listing.max_rental_days} days`)
-      return
+      alert(`Maximum rental period is ${listing.max_rental_days} days`);
+      return;
     }
-
-    setIsLoading(true)
-
+    setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Generate a mock booking ID and redirect
-      const mockBookingId = "booking-" + Math.random().toString(36).substr(2, 9)
-      router.push(`/booking/${mockBookingId}/payment`)
-    } catch (error) {
-      console.error("Booking error:", error)
-      alert("Failed to create booking. Please try again.")
+      // Create booking in DB
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          itemId: listing.id,
+          startDate,
+          endDate,
+          totalPrice: total,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.bookingId) {
+        throw new Error(data.error || "Booking failed");
+      }
+  router.push(`/booking/${data.bookingId}/confirmation`);
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      console.log("Error details:", data);
+      setError(error.message || "Failed to create booking. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -94,7 +103,7 @@ export function BookingCard({ listing }: BookingCardProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>${listing.price_per_day} per day</span>
+            <span>${listing.pricePerDay} per day</span>
             <Badge variant="outline">
               <Shield className="w-3 h-3 mr-1" />
               Protected
@@ -117,11 +126,11 @@ export function BookingCard({ listing }: BookingCardProps) {
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    disabled={isDateDisabled}
-                    initialFocus
+                    selected={startDate ?? null}
+                    onChange={date => setStartDate(date ?? undefined)}
+                    minDate={new Date()}
+                    excludeDates={bookedDates}
+                    placeholderText="Select check-in date"
                   />
                 </PopoverContent>
               </Popover>
@@ -138,15 +147,11 @@ export function BookingCard({ listing }: BookingCardProps) {
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    disabled={(date) => {
-                      if (isDateDisabled(date)) return true
-                      if (startDate && isBefore(date, startDate)) return true
-                      return false
-                    }}
-                    initialFocus
+                    selected={endDate ?? null}
+                    onChange={date => setEndDate(date ?? undefined)}
+                    minDate={startDate ?? new Date()}
+                    excludeDates={bookedDates}
+                    placeholderText="Select check-out date"
                   />
                 </PopoverContent>
               </Popover>
@@ -176,7 +181,7 @@ export function BookingCard({ listing }: BookingCardProps) {
             <div className="space-y-2 pt-4 border-t">
               <div className="flex justify-between text-sm">
                 <span>
-                  ${listing.price_per_day} × {totalDays} days
+                  ${listing.pricePerDay} × {totalDays} days
                 </span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
@@ -194,21 +199,15 @@ export function BookingCard({ listing }: BookingCardProps) {
           {/* Booking Actions */}
           <div className="space-y-3">
             <Button
-              className="w-full"
+              className="w-full cursor-pointer"
               size="lg"
               onClick={handleBooking}
               disabled={!startDate || !endDate || totalDays === 0 || isLoading}
             >
               {isLoading ? "Creating Booking..." : "Book Now"}
             </Button>
-
-            {!user && (
-              <p className="text-center text-sm text-muted-foreground">
-                <Button variant="link" className="p-0 h-auto" onClick={() => router.push("/search")}>
-                  Sign in
-                </Button>{" "}
-                to book this rental
-              </p>
+            {error && (
+              <div className="text-center text-sm text-red-600 mt-2">{error}</div>
             )}
           </div>
 
