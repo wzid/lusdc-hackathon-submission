@@ -112,42 +112,96 @@ export default function ListGearPage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">List Your Adventure Gear</h1>
-          <p className="text-xl text-slate-700 max-w-2xl mx-auto">
+        <div className="text-center mb-6 sm:mb-8 px-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-3 sm:mb-4">List Your Adventure Gear</h1>
+          <p className="text-base sm:text-lg md:text-xl text-slate-700 max-w-2xl mx-auto px-2">
             Turn your unused gear into income. Share your adventure equipment with fellow travelers.
           </p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex justify-center mb-8">
-          <div className="flex items-center space-x-4">
-            {steps.map((step, index) => (
-              <div key={step.number} className="flex items-center">
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                    currentStep >= step.number
-                      ? "bg-orange-500 border-orange-500 text-white"
-                      : "border-gray-300 text-gray-400"
-                  }`}
-                >
-                  {step.number}
+        <div className="mb-6 sm:mb-8">
+          {/* Mobile Progress - Only 2 Dots */}
+          <div className="flex flex-col items-center md:hidden">
+            <div className="flex items-center space-x-4">
+              {/* Current Step */}
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 bg-orange-500 border-orange-500 text-white text-sm font-medium">
+                  {currentStep}
                 </div>
-                <div className="ml-2 hidden md:block">
-                  <p
-                    className={`text-sm font-medium ${
-                      currentStep >= step.number ? "text-orange-600" : "text-gray-400"
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-orange-600">{steps[currentStep - 1]?.title}</p>
+                </div>
+              </div>
+
+              {/* Next Step (if not on last step) */}
+              {currentStep < steps.length && (
+                <>
+                  <div className="w-6 h-0.5 bg-gray-300" />
+                  <div className="flex items-center">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-gray-300 text-gray-400 text-sm font-medium">
+                      {currentStep + 1}
+                    </div>
+                    <div className="ml-2">
+                      <p className="text-sm font-medium text-gray-400">{steps[currentStep]?.title}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Show "Complete" on last step */}
+              {currentStep === steps.length && (
+                <>
+                  <div className="w-6 h-0.5 bg-orange-500" />
+                  <div className="flex items-center">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 bg-green-500 border-green-500 text-white text-sm font-medium">
+                      ✓
+                    </div>
+                    <div className="ml-2">
+                      <p className="text-sm font-medium text-green-600">Complete</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Progress indicator */}
+            <div className="mt-3 text-center">
+              <p className="text-xs text-gray-500">{steps[currentStep - 1]?.description}</p>
+              <p className="text-xs text-gray-400 mt-1">{currentStep} of {steps.length}</p>
+            </div>
+          </div>
+
+          {/* Desktop Progress - Full Layout */}
+          <div className="hidden md:flex justify-center">
+            <div className="flex items-center space-x-4">
+              {steps.map((step, index) => (
+                <div key={step.number} className="flex items-center">
+                  <div
+                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                      currentStep >= step.number
+                        ? "bg-orange-500 border-orange-500 text-white"
+                        : "border-gray-300 text-gray-400"
                     }`}
                   >
-                    {step.title}
-                  </p>
-                  <p className="text-xs text-gray-500">{step.description}</p>
+                    {step.number}
+                  </div>
+                  <div className="ml-2">
+                    <p
+                      className={`text-sm font-medium ${
+                        currentStep >= step.number ? "text-orange-600" : "text-gray-400"
+                      }`}
+                    >
+                      {step.title}
+                    </p>
+                    <p className="text-xs text-gray-500">{step.description}</p>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div className={`w-12 h-0.5 mx-4 ${currentStep > step.number ? "bg-orange-500" : "bg-gray-300"}`} />
+                  )}
                 </div>
-                {index < steps.length - 1 && (
-                  <div className={`w-12 h-0.5 mx-4 ${currentStep > step.number ? "bg-orange-500" : "bg-gray-300"}`} />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
@@ -230,10 +284,10 @@ export default function ListGearPage() {
                 <>
                   <div className="space-y-4">
                     <Label>Upload Photos</Label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-2">Drag and drop photos here, or click to browse</p>
-                      <p className="text-sm text-gray-500">Upload up to 10 high-quality photos</p>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-8 text-center">
+                      <Upload className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                      <p className="text-sm sm:text-base text-gray-600 mb-2">Drag and drop photos here, or click to browse</p>
+                      <p className="text-xs sm:text-sm text-gray-500">Upload up to 10 high-quality photos</p>
                       <input
                         type="file"
                         accept="image/*"
@@ -241,14 +295,16 @@ export default function ListGearPage() {
                         ref={fileInputRef}
                         onChange={handleFilesChange}
                       />
-                      <Button variant="outline" className="mt-4 bg-transparent" type="button" onClick={handleChooseFilesClick}>
+                      <Button variant="outline" className="mt-3 sm:mt-4 bg-transparent text-sm" type="button" onClick={handleChooseFilesClick}>
                         Choose Files
                       </Button>
-                      {formData.image && (
-                        <div className="mt-4 flex flex-wrap gap-2 justify-center">
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {formData.image.name}
-                          </span>
+                      {formData.images.length > 0 && (
+                        <div className="mt-3 sm:mt-4 flex flex-wrap gap-1 sm:gap-2 justify-center">
+                          {formData.images.map((file, idx) => (
+                            <span key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded break-all max-w-full">
+                              {file.name.length > 20 ? `${file.name.substring(0, 20)}...` : file.name}
+                            </span>
+                          ))}
                         </div>
                       )}
                     </div>
