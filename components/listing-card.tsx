@@ -12,7 +12,7 @@ interface ListingCardProps {
 }
 
 export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
-  const imageUrl = listing.images?.[0] || "/adventure-gear.jpg"
+  const imageUrl = listing.pictureList ?? "/adventure-gear.jpg"
 
   if (viewMode === "list") {
     return (

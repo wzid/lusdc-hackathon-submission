@@ -29,7 +29,7 @@ export interface Listing {
   location: string
   latitude?: number
   longitude?: number
-  images: string[]
+  pictureList: string
   features: string[]
   availability_start?: string
   availability_end?: string

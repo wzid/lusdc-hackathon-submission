@@ -11,6 +11,20 @@ const config = {
       bodySizeLimit: '10mb',
     },
   },
+  images: {
+    remotePatterns: [
+          {
+      protocol: 'https',
+      hostname: 'external-content.duckduckgo.com',
+      pathname: '/**',
+    },
+    {
+      protocol: 'https',
+      hostname: 'i.ibb.co',
+      pathname: '/**',
+    }
+    ],
+  },
 };
 
 export default config;
