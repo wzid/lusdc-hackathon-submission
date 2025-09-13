@@ -16,7 +16,7 @@ interface ListingDetailsProps {
 
 export function ListingDetails({ listing }: ListingDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0)
-  const images = listing.images?.length > 0 ? listing.images : ["/adventure-gear.jpg"]
+  const images = listing.pictureList ? listing.pictureList : "/adventure-gear.jpg"
 
   return (
     <div className="min-h-screen bg-background">
