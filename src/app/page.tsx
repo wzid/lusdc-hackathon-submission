@@ -12,7 +12,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold text-primary">AdventureRent</div>
+              <div className="text-2xl font-bold text-primary">Things to Rent</div>
             </div>
             <div className="hidden md:flex items-center gap-6">
               <Link href="/search" className="text-sm font-medium hover:text-primary transition-colors">
@@ -145,7 +145,7 @@ export default function HomePage() {
       <section className="py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold">Why Choose AdventureRent?</h2>
+            <h2 className="text-3xl lg:text-4xl font-bold">Why Choose Things to Rent?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
               We make it easy and safe to rent adventure gear from trusted locals
             </p>
@@ -200,7 +200,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
           <h2 className="text-3xl lg:text-4xl font-bold text-balance">Ready for Your Next Adventure?</h2>
           <p className="text-xl opacity-90 max-w-2xl mx-auto text-balance">
-            Join thousands of adventurers who trust AdventureRent for their vacation gear needs
+            Join thousands of adventurers who trust Things to Rent for their vacation gear needs
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" asChild className="text-lg px-8">
@@ -223,7 +223,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <div className="text-2xl font-bold text-primary">AdventureRent</div>
+              <div className="text-2xl font-bold text-primary">Things to Rent</div>
               <p className="text-sm text-muted-foreground">
                 The trusted marketplace for vacation transportation gear rentals.
               </p>
@@ -272,7 +272,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 AdventureRent. All rights reserved.</p>
+            <p>&copy; 2024 Things to Rent. All rights reserved.</p>
           </div>
         </div>
       </footer>

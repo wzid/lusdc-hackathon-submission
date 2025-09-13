@@ -32,7 +32,7 @@ export function ListingDetails({ listing }: ListingDetailsProps) {
                 </Link>
               </Button>
               <Link href="/" className="text-2xl font-bold text-primary">
-                AdventureRent
+                Things to Rent
               </Link>
             </div>
             <div className="flex items-center gap-3">

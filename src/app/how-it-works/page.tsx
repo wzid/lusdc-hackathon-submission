@@ -89,7 +89,7 @@ export default function HowItWorksPage() {
       {/* Hero Section */}
       <section className="py-16 px-4">
         <div className="container mx-auto text-center">
-          <h1 className="text-5xl font-bold text-slate-900 mb-6">How AdventureRent Works</h1>
+          <h1 className="text-5xl font-bold text-slate-900 mb-6">How Things to Rent Works</h1>
           <p className="text-xl text-slate-700 max-w-3xl mx-auto mb-8">
             Rent adventure gear from locals in 4 simple steps. Skip the hassle of buying expensive equipment you'll only
             use once and discover amazing gear from fellow adventurers.
@@ -138,7 +138,7 @@ export default function HowItWorksPage() {
       {/* Benefits Section */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Why Choose AdventureRent?</h2>
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Why Choose Things to Rent?</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {benefits.map((benefit, index) => (
               <Card key={index} className="text-center border-0 shadow-md">
@@ -236,7 +236,7 @@ export default function HowItWorksPage() {
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold text-white mb-6">Ready for Your Next Adventure?</h2>
           <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of adventurers who are already exploring the world with AdventureRent.
+            Join thousands of adventurers who are already exploring the world with Things to Rent.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" variant="secondary">

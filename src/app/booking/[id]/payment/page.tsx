@@ -99,7 +99,7 @@ export default function PaymentPage({ params }: PaymentPageProps) {
                 </Link>
               </Button>
               <Link href="/" className="text-2xl font-bold text-primary">
-                AdventureRent
+                Things to Rent
               </Link>
             </div>
           </div>
