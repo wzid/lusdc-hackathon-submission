@@ -47,7 +47,7 @@ export default function HomePage() {
             </div>
             <div className="relative">
               <div className="aspect-square relative rounded-2xl overflow-hidden bg-gradient-to-br from-orange-100 to-teal-100 dark:from-orange-900/20 dark:to-teal-900/20">
-                <Image src="/adventure-sports-collage-with-bikes--kayaks--skis-.jpg" alt="Adventure gear collage" fill className="object-cover" />
+                <Image src="/adventure-sports-collage-with-bikes--kayaks--skis-.png" alt="Adventure gear collage" fill className="object-cover" />
               </div>
               <div className="absolute -bottom-6 -left-6 bg-white dark:bg-card p-4 rounded-xl shadow-lg border">
                 <div className="flex items-center gap-3">
