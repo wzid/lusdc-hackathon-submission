@@ -3,7 +3,52 @@ import { db } from "~/server/db";
 import { items } from "~/server/db/schema";
 
 export async function GET(request: Request) {
-  // You can add query param parsing here for filters
-  const listings = await db.select().from(items);
-  return NextResponse.json(listings);
+  // Parse query params for filters
+  const { searchParams } = new URL(request.url);
+  const search = searchParams.get("search") ?? "";
+  const category = searchParams.get("category") ?? "";
+  const location = searchParams.get("location") ?? "";
+  const priceMin = Number(searchParams.get("priceMin")) ?? 0;
+  const priceMax = Number(searchParams.get("priceMax")) ?? 200;
+  const sortBy = searchParams.get("sortBy") ?? "newest";
+
+  // Fetch all listings
+  const allListings = await db.select().from(items);
+  let filteredListings = allListings;
+
+  if (search) {
+    filteredListings = filteredListings.filter(
+      (listing) =>
+        (listing.name?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
+        (listing.description?.toLowerCase().includes(search.toLowerCase()) ?? false)
+    );
+  }
+  if (category && category !== "0") {
+    filteredListings = filteredListings.filter((listing) => String(listing.typeId) === category);
+  }
+  if (location) {
+    filteredListings = filteredListings.filter((listing) =>
+      listing.location?.toLowerCase().includes(location.toLowerCase())
+    );
+  }
+  filteredListings = filteredListings.filter(
+    (listing) => {
+      const price = listing.pricePerDay ?? 0;
+      return price >= priceMin && price <= priceMax;
+    }
+  );
+
+  switch (sortBy) {
+    case "price_low":
+      filteredListings.sort((a, b) => (a.pricePerDay ?? 0) - (b.pricePerDay ?? 0));
+      break;
+    case "price_high":
+      filteredListings.sort((a, b) => (b.pricePerDay ?? 0) - (a.pricePerDay ?? 0));
+      break;
+    case "newest":
+    default:
+      filteredListings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  return NextResponse.json(filteredListings);
 }

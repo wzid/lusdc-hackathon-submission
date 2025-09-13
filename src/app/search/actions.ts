@@ -31,7 +31,8 @@ export async function getListingsFromDb({
         (listing.description?.toLowerCase().includes(search.toLowerCase()) ?? false)
     );
   }
-  if (category) {
+  
+  if (category && category !== "all" && category !== "null") {
     filteredListings = filteredListings.filter((listing) => String(listing.typeId) === category);
   }
   if (location) {

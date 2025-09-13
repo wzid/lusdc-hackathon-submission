@@ -10,6 +10,7 @@ import { ListingCard } from "@/components/listing-card"
 import { getListingsFromDb } from "./actions"
 import Link from "next/link"
 import { MapPin, Filter, Grid, List } from "lucide-react"
+import { set } from "date-fns"
 
 export default function SearchPage() {
   const [listings, setListings] = useState<any[]>([])
@@ -24,11 +25,53 @@ export default function SearchPage() {
     sortBy: "newest",
   })
 
+  const REAL_categories = [
+    "Dirt Bike",
+    "Electric Bike",
+    "",
+    "Road Bike",
+    "Mountain Bike",
+    "Snowboard",
+    "Canoe",
+    "Kayak",
+    "Moped",
+    "Electric Scooter",
+    "4-Wheel ATV",
+    "Paddleboard",
+    "Jet Ski",
+    "Skidoo",
+    "Snow Skis",
+]
+
   useEffect(() => {
+      setCategories([
+    "Dirt Bike",
+    "Electric Bike",
+    "Road Bike",
+    "Mountain Bike",
+    "Snowboard",
+    "Canoe",
+    "Kayak",
+    "Moped",
+    "Electric Scooter",
+    "4-Wheel ATV",
+    "Paddleboard",
+    "Jet Ski",
+    "Skidoo",
+    "Snow Skis",
+  ])
     const fetchListings = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/listings");
+        const params = new URLSearchParams({
+          search: filters.search,
+          category: (filters.category == "all" || filters.category == "") ? 0 : REAL_categories.indexOf(filters.category) + 1,
+          location: filters.location,
+          priceMin: String(filters.priceRange[0]),
+          priceMax: String(filters.priceRange[1]),
+          sortBy: filters.sortBy,
+        });
+        const res = await fetch(`/api/listings?${params.toString()}`);
         const data = await res.json();
         console.log("Fetched listings:", data);
         setListings(data);
@@ -88,9 +131,9 @@ export default function SearchPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All categories</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.icon} {category.name}
+                  {categories.map((category: string, i) => (
+                    <SelectItem key={i} value={category}>
+                      {category}
                     </SelectItem>
                   ))}
                 </SelectContent>

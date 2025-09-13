@@ -142,7 +142,7 @@ export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
             <Badge className="bg-black/70 text-white">${listing.pricePerDay}/day</Badge>
           </div>
         </div>
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="px-4 pt-4 pb-1 space-y-3">
           <div>
             <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
               {listing.name}
