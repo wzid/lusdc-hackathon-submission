@@ -3,38 +3,7 @@ import { db } from "~/server/db";
 import { items } from "~/server/db/schema";
 
 export async function GET(request: Request) {
-  try {
-    // You can add query param parsing here for filters
-    const listings = await db.select().from(items);
-    
-    // Transform database fields to match frontend expectations
-    const transformedListings = listings.map((item) => ({
-      id: item.id.toString(), // Convert back to string for frontend
-      owner_id: item.ownerId || "",
-      category_id: item.typeId?.toString() || "",
-      title: item.name || "",
-      description: item.description || "",
-      price_per_day: item.pricePerDay || 0,
-      location: item.location || "",
-      images: item.pictureList ? (
-        item.pictureList.startsWith('[') || item.pictureList.startsWith('{') 
-          ? JSON.parse(item.pictureList) 
-          : [item.pictureList]
-      ) : [],
-      features: [], // Not in current schema
-      min_rental_days: 1, // Default value
-      max_rental_days: 30, // Default value
-      is_active: item.available === 1,
-      created_at: item.createdAt && typeof item.createdAt === 'number' ? new Date(item.createdAt * 1000).toISOString() : new Date().toISOString(),
-      updated_at: item.updatedAt && typeof item.updatedAt === 'number' ? new Date(item.updatedAt * 1000).toISOString() : (item.createdAt && typeof item.createdAt === 'number' ? new Date(item.createdAt * 1000).toISOString() : new Date().toISOString()),
-    }));
-
-    return NextResponse.json(transformedListings);
-  } catch (error) {
-    console.error("Error fetching listings:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+  // You can add query param parsing here for filters
+  const listings = await db.select().from(items);
+  return NextResponse.json(listings);
 }
