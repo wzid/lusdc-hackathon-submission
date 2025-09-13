@@ -43,6 +43,7 @@ export default function ListGearPage() {
   const categories = [
     "Dirt Bike",
     "Electric Bike",
+    "",
     "Road Bike",
     "Mountain Bike",
     "Snowboard",

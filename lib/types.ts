@@ -22,10 +22,10 @@ export interface Category {
 export interface Listing {
   id: string
   owner_id: string
-  category_id: string
-  title: string
+  typeId: string
+  name: string
   description: string
-  price_per_day: number
+  pricePerDay: number
   location: string
   latitude?: number
   longitude?: number

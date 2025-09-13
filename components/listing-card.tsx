@@ -11,8 +11,62 @@ interface ListingCardProps {
   viewMode?: "grid" | "list"
 }
 
+const categories = [
+    "Dirt Bike",
+    "Electric Bike",
+    "",
+    "Road Bike",
+    "Mountain Bike",
+    "Snowboard",
+    "Canoe",
+    "Kayak",
+    "Moped",
+    "Electric Scooter",
+    "4-Wheel ATV",
+    "Paddleboard",
+    "Jet Ski",
+    "Skidoo",
+    "Snow Skis",
+]
+
+const getIconForCategory = (categoryName: string | undefined) => {
+  switch (categoryName) {
+    case "Dirt Bike":
+      return "🏍️"
+    case "Electric Bike":
+      return "🚲"
+    case "Road Bike":
+      return "🚴"
+    case "Mountain Bike":
+      return "⛰️"
+    case "Snowboard":
+      return "🏂"
+    case "Canoe":
+      return "🛶"
+    case "Kayak":
+      return "🛶"
+    case "Moped":
+      return "🛵"
+    case "Electric Scooter":
+      return "🛴"
+    case "4-Wheel ATV":
+      return "🛻"
+    case "Paddleboard":
+      return "🏄"
+    case "Jet Ski":
+      return "🚤"
+    case "Skidoo":
+      return "❄️"
+    case "Snow Skis":
+      return "⛷️"
+    default:
+      return "❓"
+  }
+}
+
 export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
   const imageUrl = listing.pictureList ?? "/adventure-gear.jpg"
+  const category = categories[listing.typeId - 1] ?? "WHAT"
 
   if (viewMode === "list") {
     return (
@@ -21,7 +75,7 @@ export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
           <div className="w-64 h-48 relative flex-shrink-0">
             <Image
               src={imageUrl || "/placeholder.svg"}
-              alt={listing.title}
+              alt={listing.name}
               fill
               className="object-cover rounded-l-lg"
             />
@@ -34,14 +88,14 @@ export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
                     {listing.category?.icon} {listing.category?.name}
                   </Badge>
                 </div>
-                <h3 className="text-xl font-semibold">{listing.title}</h3>
+                <h3 className="text-xl font-semibold">{listing.name}</h3>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4" />
                   {listing.location}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold">${listing.price_per_day}</div>
+                <div className="text-2xl font-bold">${listing.pricePerDay}</div>
                 <div className="text-sm text-muted-foreground">per day</div>
               </div>
             </div>
@@ -75,23 +129,23 @@ export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
         <div className="aspect-video relative overflow-hidden rounded-t-lg">
           <Image
             src={imageUrl || "/placeholder.svg"}
-            alt={listing.title}
+            alt={listing.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-3 left-3">
-            <Badge variant="secondary" className="bg-white/90 text-black">
-              {listing.category?.icon} {listing.category?.name}
+            <Badge size="sm" variant="secondary" className="bg-white/90 text-black">
+              {getIconForCategory(category)} {category}
             </Badge>
           </div>
           <div className="absolute top-3 right-3">
-            <Badge className="bg-black/70 text-white">${listing.price_per_day}/day</Badge>
+            <Badge className="bg-black/70 text-white">${listing.pricePerDay}/day</Badge>
           </div>
         </div>
         <CardContent className="p-4 space-y-3">
           <div>
             <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-              {listing.title}
+              {listing.name}
             </h3>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <MapPin className="w-4 h-4" />
@@ -99,16 +153,7 @@ export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground line-clamp-2">{listing.description}</p>
-
-          <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-1 text-sm">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-medium">4.8</span>
-              <span className="text-muted-foreground">(12)</span>
-            </div>
-            <div className="text-sm text-muted-foreground">{listing.min_rental_days} day minimum</div>
-          </div>
+          <p className="text-sm text-muted-foreground line-clamp-3">{listing.description}</p>
         </CardContent>
       </Link>
     </Card>
