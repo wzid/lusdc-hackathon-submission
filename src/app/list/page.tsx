@@ -397,10 +397,16 @@ export default function ListGearPage() {
                 <div className="flex justify-between">
                   <Button
                     variant="outline"
-                    onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                    disabled={currentStep === 1}
+                    onClick={() => {
+                      if (currentStep === 1) {
+                        // Return to homepage
+                        window.location.href = "/"
+                      } else {
+                        setCurrentStep(Math.max(1, currentStep - 1))
+                      }
+                    }}
                   >
-                    Previous
+                    {currentStep === 1 ? "Cancel" : "Previous"}
                   </Button>
                   <Button
                     onClick={async () => {
