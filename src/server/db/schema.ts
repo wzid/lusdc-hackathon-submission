@@ -2,7 +2,7 @@
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
 import { sql } from "drizzle-orm";
-import { index, sqliteTableCreator } from "drizzle-orm/sqlite-core";
+import { index, sqliteTableCreator, sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -30,22 +30,55 @@ export const posts = createTable(
 
 
 
-
-// (Remove these duplicate imports and redeclaration)
-
-// Users: account info
-export const users = createTable(
+// Users: account info - Updated to work with NextAuth (text IDs)
+export const users = sqliteTable(
   "user",
-  (d) => ({
-    id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
-    email: d.text({ length: 256 }).notNull().unique(),
-    name: d.text({ length: 128 }).notNull(),
-    picture: d.text({ length: 512 }),
-    contactInfo: d.text({ length: 512 }),
-    createdAt: d.integer({ mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  }),
+  {
+    id: text("id").primaryKey(),
+    name: text("name"),
+    email: text("email").unique(),
+    emailVerified: integer("emailVerified", { mode: "timestamp" }),
+    image: text("image"),
+    contactInfo: text("contactInfo", { length: 512 }),
+    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  },
   (t) => [index("user_email_idx").on(t.email)]
 );
+
+// NextAuth required tables - using standard names without prefix
+export const accounts = sqliteTable("account", {
+  userId: text("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),
+  provider: text("provider").notNull(),
+  providerAccountId: text("providerAccountId").notNull(),
+  refresh_token: text("refresh_token"),
+  access_token: text("access_token"),
+  expires_at: integer("expires_at"),
+  token_type: text("token_type"),
+  scope: text("scope"),
+  id_token: text("id_token"),
+  session_state: text("session_state"),
+}, (account) => ({
+  compoundKey: primaryKey({
+    columns: [account.provider, account.providerAccountId],
+  }),
+}));
+
+export const sessions = sqliteTable("session", {
+  sessionToken: text("sessionToken").primaryKey(),
+  userId: text("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expires: integer("expires", { mode: "timestamp" }).notNull(),
+});
+
+export const verificationTokens = sqliteTable("verificationToken", {
+  identifier: text("identifier").notNull(),
+  token: text("token").unique().notNull(),
+  expires: integer("expires", { mode: "timestamp" }).notNull(),
+}, (vt) => ({
+  compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+}));
+
+
 
 // Item types: bike, moped, kayak, etc
 export const itemTypes = createTable(
@@ -61,7 +94,7 @@ export const items = createTable(
   "item",
   (d) => ({
     id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
-    ownerId: d.integer({ mode: "number" }).references(() => users.id, { onDelete: "cascade" }).notNull(),
+    ownerId: d.text().references(() => users.id, { onDelete: "cascade" }).notNull(),
     typeId: d.integer({ mode: "number" }).references(() => itemTypes.id).notNull(),
     name: d.text({ length: 256 }).notNull(),
     description: d.text({ length: 1024 }),
@@ -82,7 +115,7 @@ export const bookings = createTable(
   (d) => ({
     id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
     itemId: d.integer({ mode: "number" }).references(() => items.id, { onDelete: "cascade" }).notNull(),
-    renterId: d.integer({ mode: "number" }).references(() => users.id, { onDelete: "cascade" }).notNull(),
+    renterId: d.text().references(() => users.id, { onDelete: "cascade" }).notNull(),
     startDate: d.integer({ mode: "timestamp" }).notNull(),
     endDate: d.integer({ mode: "timestamp" }).notNull(),
     totalPrice: d.integer({ mode: "number" }).notNull(),
@@ -98,7 +131,7 @@ export const reviews = createTable(
   (d) => ({
     id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
     itemId: d.integer({ mode: "number" }).references(() => items.id, { onDelete: "cascade" }).notNull(),
-    reviewerId: d.integer({ mode: "number" }).references(() => users.id, { onDelete: "cascade" }).notNull(),
+    reviewerId: d.text().references(() => users.id, { onDelete: "cascade" }).notNull(),
     rating: d.integer({ mode: "number" }).notNull(), // 1-5
     comment: d.text({ length: 1024 }),
     createdAt: d.integer({ mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),

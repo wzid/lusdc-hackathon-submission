@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { AuthNav } from "~/components/auth-nav"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -25,14 +26,7 @@ export default function HomePage() {
                 How It Works
               </Link>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" asChild>
-                <Link href="/auth/login">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/auth/sign-up">Get Started</Link>
-              </Button>
-            </div>
+            <AuthNav />
           </div>
         </div>
       </nav>

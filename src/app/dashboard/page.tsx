@@ -67,9 +67,6 @@ export default function DashboardPage() {
               <Button variant="ghost" asChild>
                 <Link href="/search">Browse Rentals</Link>
               </Button>
-              <Button asChild>
-                <Link href="/profile">Profile</Link>
-              </Button>
             </div>
           </div>
         </div>
