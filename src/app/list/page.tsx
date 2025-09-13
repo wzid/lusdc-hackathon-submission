@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,10 +16,18 @@ import { Upload, MapPin, DollarSign, Shield, Star } from "lucide-react"
 import { publishListingServerAction } from "./actions";
 
 export default function ListGearPage() {
+
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
   const [showStepError, setShowStepError] = useState(false)
   const router = useRouter()
+  const { status } = useSession()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login")
+    }
+  }, [status, router])
 
   type GearFormData = {
     title: string
@@ -102,7 +111,7 @@ export default function ListGearPage() {
   };
 
   const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    const file = e.target.files?.[0] ?? null;
     setFormData((prev) => ({
       ...prev,
       image: file,
@@ -249,9 +258,11 @@ export default function ListGearPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
+                          category && (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          )
                         ))}
                       </SelectContent>
                     </Select>
@@ -299,13 +310,11 @@ export default function ListGearPage() {
                       <Button variant="outline" className="mt-3 sm:mt-4 bg-transparent text-sm" type="button" onClick={handleChooseFilesClick}>
                         Choose Files
                       </Button>
-                      {formData.images.length > 0 && (
+                      {formData.image && (
                         <div className="mt-3 sm:mt-4 flex flex-wrap gap-1 sm:gap-2 justify-center">
-                          {formData.images.map((file, idx) => (
-                            <span key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded break-all max-w-full">
-                              {file.name.length > 20 ? `${file.name.substring(0, 20)}...` : file.name}
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded break-all max-w-full">
+                              {formData.image.name.length > 20 ? `${formData.image.name.substring(0, 20)}...` : formData.image.name}
                             </span>
-                          ))}
                         </div>
                       )}
                     </div>
