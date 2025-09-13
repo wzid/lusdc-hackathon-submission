@@ -66,7 +66,7 @@ const getIconForCategory = (categoryName: string | undefined) => {
 
 export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
   const imageUrl = listing.pictureList ?? "/adventure-gear.jpg"
-  const category = categories[listing.typeId - 1] ?? "WHAT"
+  const category = categories[Number(listing.typeId) - 1] ?? "WHAT"
 
   if (viewMode === "list") {
     return (
