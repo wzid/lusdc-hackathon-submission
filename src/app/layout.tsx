@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { Providers } from '~/components/providers'
+import { Navbar } from '~/components/navbar'
 import { getServerAuthSession } from '~/lib/auth'
 import './globals.css'
 
@@ -24,6 +25,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Providers session={session}>
+          <Navbar />
           {children}
         </Providers>
       </body>

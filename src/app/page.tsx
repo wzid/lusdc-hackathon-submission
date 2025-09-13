@@ -1,35 +1,12 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { AuthNav } from "~/components/auth-nav"
 import Link from "next/link"
 import Image from "next/image"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold text-primary">Things to Rent</div>
-            </div>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/search" className="text-sm font-medium hover:text-primary transition-colors">
-                Browse Rentals
-              </Link>
-              <Link href="/list" className="text-sm font-medium hover:text-primary transition-colors">
-                List Your Gear
-              </Link>
-              <Link href="/how-it-works" className="text-sm font-medium hover:text-primary transition-colors">
-                How It Works
-              </Link>
-            </div>
-            <AuthNav />
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">

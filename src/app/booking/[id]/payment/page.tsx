@@ -37,8 +37,8 @@ export default function PaymentPage({ params }: PaymentPageProps) {
 
   const fetchBooking = async () => {
     const { id } = await params
-    const mockBooking = mockBookings.find((b) => b.id === id) || mockBookings[0]
-    setBooking(mockBooking)
+    const mockBooking = mockBookings.find((b) => b.id === id)
+    setBooking(mockBooking || mockBookings[0] || null)
     setLoading(false)
   }
 
@@ -87,26 +87,16 @@ export default function PaymentPage({ params }: PaymentPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href={`/listing/${booking.listing?.id}`}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Listing
-                </Link>
-              </Button>
-              <Link href="/" className="text-2xl font-bold text-primary">
-                Things to Rent
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href={`/listing/${booking.listing?.id}`}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Listing
+            </Link>
+          </Button>
+        </div>
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold">Complete your booking</h1>
