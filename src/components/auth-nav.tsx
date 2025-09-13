@@ -2,6 +2,12 @@
 
 import { useSession, signIn, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 
 export function AuthNav() {
@@ -14,22 +20,39 @@ export function AuthNav() {
   if (session) {
     return (
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          {session.user?.image && (
-            <img
-              src={session.user.image}
-              alt={session.user.name || "User"}
-              className="h-8 w-8 rounded-full"
-            />
-          )}
-          <span className="text-sm font-medium">{session.user?.name}</span>
-        </div>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/dashboard">Dashboard</Link>
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
-          Sign Out
-        </Button>
+        {/* Show user name on larger screens */}
+        <span className="text-sm font-medium hidden sm:block">{session.user?.name}</span>
+        
+        {/* Dropdown menu for all screen sizes */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full p-0">
+              {session.user?.image ? (
+                <img
+                  src={session.user.image}
+                  alt={session.user.name || "User"}
+                  className="h-8 w-8 rounded-full"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-xs font-medium">
+                    {session.user?.name?.[0]?.toUpperCase() || "U"}
+                  </span>
+                </div>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard" className="w-full">
+                Dashboard
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })} className="w-full">
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     )
   }
@@ -44,7 +67,7 @@ export function AuthNav() {
         }}
         type="button"
       >
-        Sign In with Google
+        Sign In
       </Button>
     </div>
   )
