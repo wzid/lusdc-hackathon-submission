@@ -9,28 +9,28 @@ export default function HowItWorksPage() {
       icon: Search,
       title: "Browse & Discover",
       description:
-        "Search thousands of adventure gear listings in your destination. Filter by location, dates, and gear type.",
-      details: ["Advanced search filters", "Real-time availability", "Verified listings", "Local recommendations"],
+        "Search dozens of adventure gear listings in your destination. Filter by location, dates, and gear type.",
+      details: ["Advanced search filters", "Real-time availability", "Verified listings"],
     },
     {
       icon: Calendar,
       title: "Book Instantly",
       description:
         "Select your dates, review the details, and book instantly. Most listings offer immediate confirmation.",
-      details: ["Instant booking", "Flexible dates", "Clear pricing", "Cancellation protection"],
+      details: ["Instant booking", "Flexible dates", "Clear pricing"],
     },
     {
       icon: MapPin,
       title: "Meet & Collect",
       description: "Coordinate pickup with the owner. Many offer delivery or meet at convenient locations.",
-      details: ["Flexible pickup options", "GPS coordinates", "Owner communication", "Safety guidelines"],
+      details: ["Flexible pickup options", "GPS coordinates", "Owner communication"],
     },
     {
       icon: Star,
       title: "Adventure & Return",
       description:
         "Enjoy your adventure! Return the gear in the same condition and leave a review for the next adventurer.",
-      details: ["24/7 support", "Damage protection", "Easy returns", "Community reviews"],
+      details: ["24/7 support", "Easy returns", "Community reviews"],
     },
   ]
 
@@ -55,18 +55,13 @@ export default function HowItWorksPage() {
     },
     {
       icon: Heart,
-      title: "Local Experts",
-      description: "Get insider tips from locals who know the best spots.",
+      title: "Unforgettable Experiences",
+      description: "Discover a new adventure at every destination.",
       color: "text-red-600",
     },
   ]
 
   const faqs = [
-    {
-      question: "What if the gear gets damaged?",
-      answer:
-        "All rentals include damage protection. Minor wear is expected, but significant damage is covered by our insurance policy.",
-    },
     {
       question: "Can I cancel my booking?",
       answer:
@@ -89,10 +84,11 @@ export default function HowItWorksPage() {
       {/* Hero Section */}
       <section className="py-16 px-4">
         <div className="container mx-auto text-center">
-          <h1 className="text-5xl font-bold text-slate-900 mb-6">How Things to Rent Works</h1>
+          <h1 className="text-5xl font-bold text-slate-900 mb-6">Things to Rent - How it Works</h1>
           <p className="text-xl text-slate-700 max-w-3xl mx-auto mb-8">
-            Rent adventure gear from locals in 4 simple steps. Skip the hassle of buying expensive equipment you'll only
-            use once and discover amazing gear from fellow adventurers.
+            Rent adventure gear from locals wherever you travel.
+            When you can't bring your own equipment on your journey, Things to Rent has you covered.
+            Discover what adventures are available at your destination.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="bg-orange-500 hover:bg-orange-600">
@@ -167,10 +163,6 @@ export default function HowItWorksPage() {
                 <div className="flex items-center gap-3">
                   <Award className="w-5 h-5 text-teal-600" />
                   <span>Earn up to $200+ per month per item</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-teal-600" />
-                  <span>$1M insurance coverage included</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Users className="w-5 h-5 text-teal-600" />
