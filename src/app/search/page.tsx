@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ListingCard } from "@/components/listing-card"
-import { getListingsFromDb } from "./actions"
 import Link from "next/link"
 import { MapPin, Filter, Grid, List } from "lucide-react"
 
