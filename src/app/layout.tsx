@@ -6,8 +6,11 @@ import { getServerAuthSession } from '~/lib/auth'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'RentEase - Rent Anything, Anytime',
-  description: 'The premier platform for renting and listing items',
+  title: 'Things To Rent - Rent Travel Gear Anytime',
+  description: 'The premier platform for renting and listing big-ticket travel items',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default async function RootLayout({

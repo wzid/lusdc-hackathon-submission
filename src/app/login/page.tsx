@@ -47,7 +47,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Welcome to RentEase</CardTitle>
+          <CardTitle>Welcome to Things to Rent</CardTitle>
           <CardDescription>
             Sign in to your account to start renting or listing items
           </CardDescription>
