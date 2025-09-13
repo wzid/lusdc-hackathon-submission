@@ -3,23 +3,12 @@ import { NextResponse } from "next/server"
 
 export default withAuth(
   function middleware(req) {
+    // This middleware function runs when authorized() returns true
     const { pathname } = req.nextUrl
-    const token = req.nextauth.token
     
-    // Define protected routes
-    const protectedRoutes = ['/dashboard', '/profile', '/list']
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-    
-    // If user is authenticated and tries to access login page, redirect to dashboard
-    if (token && pathname === '/login') {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
-    }
-    
-    // If accessing protected route without auth, redirect to login
-    if (isProtectedRoute && !token) {
-      const loginUrl = new URL('/login', req.url)
-      loginUrl.searchParams.set('callbackUrl', pathname)
-      return NextResponse.redirect(loginUrl)
+    // If user is authenticated and tries to access login page, redirect to list page
+    if (pathname === '/login') {
+      return NextResponse.redirect(new URL('/list', req.url))
     }
     
     return NextResponse.next()
@@ -28,13 +17,16 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl
-        const protectedRoutes = ['/dashboard', '/profile', '/list']
+        const protectedRoutes = ['/profile']
         const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
         
-        // Allow access to public routes
+        // If accessing login page, always allow (but middleware will handle redirect)
+        if (pathname === '/login') return true
+        
+        // Allow access to public routes (including /list)
         if (!isProtectedRoute) return true
         
-        // Require token for protected routes
+        // For protected routes, require token
         return !!token
       },
     },

@@ -28,8 +28,8 @@ export const authOptions: NextAuthOptions = {
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // Allow redirect to same origin
       else if (new URL(url).origin === baseUrl) return url
-      // Default redirect to dashboard after successful login
-      return `${baseUrl}/dashboard`
+      // Default redirect to list page after successful login
+      return `${baseUrl}/list`
     },
   },
   pages: {
