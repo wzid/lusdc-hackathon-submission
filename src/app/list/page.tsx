@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,9 +11,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Upload, MapPin, DollarSign, Shield, Star } from "lucide-react"
 
+import { publishListingServerAction } from "./actions";
+
 export default function ListGearPage() {
   const [currentStep, setCurrentStep] = useState(1)
-  const [formData, setFormData] = useState({
+
+  type GearFormData = {
+    title: string
+    description: string
+    category: string
+    location: string
+    pricePerDay: string
+    features: string[]
+    images: File[]
+  }
+
+  const [formData, setFormData] = useState<GearFormData>({
     title: "",
     description: "",
     category: "",
@@ -24,35 +37,55 @@ export default function ListGearPage() {
   })
 
   const categories = [
-    "Bicycles & E-bikes",
-    "Kayaks & Canoes",
-    "Surfboards & SUPs",
-    "Skis & Snowboards",
-    "Scooters & Mopeds",
-    "Camping Gear",
-    "Water Sports",
-    "Winter Sports",
+    "Dirt Bike",
+    "Electric Bike",
+    "Road Bike",
+    "Mountain Bike",
+    "Snowboard",
+    "Canoe",
+    "Kayak",
+    "Moped",
+    "Electric Scooter",
+    "4-Wheel ATV",
+    "Paddleboard",
+    "Jet Ski",
+    "Skidoo",
+    "Snow Skis",
   ]
 
-  const availableFeatures = [
-    "GPS Included",
-    "Helmet Included",
-    "Lock Included",
-    "Delivery Available",
-    "Insurance Covered",
-    "Maintenance Included",
-    "Quick Setup",
-    "Beginner Friendly",
-  ]
-
-  const handleFeatureToggle = (feature: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      features: prev.features.includes(feature)
-        ? prev.features.filter((f) => f !== feature)
-        : [...prev.features, feature],
-    }))
-  }
+  const publishListing = async (fd: GearFormData) => {
+    console.log("Publishing listing:", fd);
+    try {
+      const base64Images = await Promise.all(
+        fd.images.map(
+          (file) =>
+            new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const result = reader.result as string;
+                // Remove data URL prefix if present
+                const base64 = result?.split(",")[1] ?? result ?? "";
+                resolve(base64);
+              };
+              reader.onerror = () => reject(new Error(reader.error?.message ?? "File read error"));
+              reader.readAsDataURL(file);
+            })
+        )
+      );
+      // Call server action to upload images and insert into DB
+      await publishListingServerAction({
+        ownerId: 1, // Placeholder, replace with actual user ID
+        typeId: categories.indexOf(fd.category) + 1, // Placeholder, replace with actual type ID based on category
+        title: fd.title,
+        description: fd.description,
+        pricePerDay: parseInt(fd.pricePerDay) || 0,
+        base64Images,
+        location: fd.location,
+      });
+    } catch (err) {
+      console.error("Error uploading images or publishing listing:", err);
+    }
+  };
 
   const steps = [
     { number: 1, title: "Basic Info", description: "Tell us about your gear" },
@@ -60,6 +93,21 @@ export default function ListGearPage() {
     { number: 3, title: "Pricing", description: "Set your rates" },
     { number: 4, title: "Review", description: "Publish your listing" },
   ]
+
+  // Ref for file input
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleChooseFilesClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    setFormData((prev) => ({
+      ...prev,
+      images: files,
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
@@ -113,9 +161,9 @@ export default function ListGearPage() {
                 {currentStep === 2 && <Upload className="w-5 h-5" />}
                 {currentStep === 3 && <DollarSign className="w-5 h-5" />}
                 {currentStep === 4 && <Star className="w-5 h-5" />}
-                {steps[currentStep - 1].title}
+                {steps[currentStep - 1]?.title ?? ""}
               </CardTitle>
-              <CardDescription>{steps[currentStep - 1].description}</CardDescription>
+              <CardDescription>{steps[currentStep - 1]?.description ?? ""}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Step 1: Basic Info */}
@@ -127,7 +175,7 @@ export default function ListGearPage() {
                       id="title"
                       placeholder="e.g., Premium Mountain Bike with Helmet"
                       value={formData.title}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                     />
                   </div>
 
@@ -135,7 +183,7 @@ export default function ListGearPage() {
                     <Label htmlFor="category">Category</Label>
                     <Select
                       value={formData.category}
-                      onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
+                      onValueChange={(value: string) => setFormData((prev) => ({ ...prev, category: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select gear category" />
@@ -156,7 +204,7 @@ export default function ListGearPage() {
                       id="location"
                       placeholder="City, State"
                       value={formData.location}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
                     />
                   </div>
 
@@ -167,7 +215,7 @@ export default function ListGearPage() {
                       placeholder="Describe your gear, its condition, and what makes it special..."
                       rows={4}
                       value={formData.description}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                     />
                   </div>
                 </>
@@ -182,27 +230,26 @@ export default function ListGearPage() {
                       <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600 mb-2">Drag and drop photos here, or click to browse</p>
                       <p className="text-sm text-gray-500">Upload up to 10 high-quality photos</p>
-                      <Button variant="outline" className="mt-4 bg-transparent">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        ref={fileInputRef}
+                        onChange={handleFilesChange}
+                      />
+                      <Button variant="outline" className="mt-4 bg-transparent" type="button" onClick={handleChooseFilesClick}>
                         Choose Files
                       </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <Label>Features & Amenities</Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {availableFeatures.map((feature) => (
-                        <div key={feature} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={feature}
-                            checked={formData.features.includes(feature)}
-                            onCheckedChange={() => handleFeatureToggle(feature)}
-                          />
-                          <Label htmlFor={feature} className="text-sm">
-                            {feature}
-                          </Label>
+                      {formData.images.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                          {formData.images.map((file, idx) => (
+                            <span key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                              {file.name}
+                            </span>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </>
@@ -221,7 +268,7 @@ export default function ListGearPage() {
                         placeholder="0.00"
                         className="pl-10"
                         value={formData.pricePerDay}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, pricePerDay: e.target.value }))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev) => ({ ...prev, pricePerDay: e.target.value }))}
                       />
                     </div>
                   </div>
@@ -271,8 +318,8 @@ export default function ListGearPage() {
                     <CardContent className="pt-6">
                       <h3 className="font-semibold text-orange-800 mb-2">Ready to Go Live?</h3>
                       <p className="text-sm text-orange-700">
-                        Your listing will be reviewed and published within 24 hours. You'll receive an email
-                        confirmation once it's live.
+                        Your listing will be reviewed and published within 24 hours. You&apos;ll receive an email
+                        confirmation once it&apos;s live.
                       </p>
                     </CardContent>
                   </Card>
@@ -289,12 +336,11 @@ export default function ListGearPage() {
                   Previous
                 </Button>
                 <Button
-                  onClick={() => {
+                  onClick={async () => {
                     if (currentStep === 4) {
-                      // Handle form submission
-                      console.log("Publishing listing:", formData)
+                      await publishListing(formData);
                     } else {
-                      setCurrentStep(Math.min(4, currentStep + 1))
+                      setCurrentStep(Math.min(4, currentStep + 1));
                     }
                   }}
                   className="bg-orange-500 hover:bg-orange-600"

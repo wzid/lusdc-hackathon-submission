@@ -7,13 +7,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ListingCard } from "@/components/listing-card"
-import { mockListings, mockCategories, type Listing, type Category } from "@/lib/mock-data"
+import { getListingsFromDb } from "./actions"
 import Link from "next/link"
 import { MapPin, Filter, Grid, List } from "lucide-react"
 
 export default function SearchPage() {
-  const [listings, setListings] = useState<Listing[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+  const [listings, setListings] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [filters, setFilters] = useState({
@@ -25,64 +25,20 @@ export default function SearchPage() {
   })
 
   useEffect(() => {
-    fetchCategories()
-    fetchListings()
-  }, [])
-
-  useEffect(() => {
-    fetchListings()
-  }, [filters])
-
-  const fetchCategories = async () => {
-    setCategories(mockCategories)
-  }
-
-  const fetchListings = async () => {
-    setLoading(true)
-
-    let filteredListings = mockListings.filter((listing) => listing.is_active)
-
-    // Apply filters
-    if (filters.search) {
-      filteredListings = filteredListings.filter(
-        (listing) =>
-          listing.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-          listing.description.toLowerCase().includes(filters.search.toLowerCase()),
-      )
-    }
-
-    if (filters.category) {
-      filteredListings = filteredListings.filter((listing) => listing.category_id === filters.category)
-    }
-
-    if (filters.location) {
-      filteredListings = filteredListings.filter((listing) =>
-        listing.location.toLowerCase().includes(filters.location.toLowerCase()),
-      )
-    }
-
-    filteredListings = filteredListings.filter(
-      (listing) => listing.price_per_day >= filters.priceRange[0] && listing.price_per_day <= filters.priceRange[1],
-    )
-
-    // Apply sorting
-    switch (filters.sortBy) {
-      case "price_low":
-        filteredListings.sort((a, b) => a.price_per_day - b.price_per_day)
-        break
-      case "price_high":
-        filteredListings.sort((a, b) => b.price_per_day - a.price_per_day)
-        break
-      case "newest":
-        filteredListings.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        break
-      default:
-        filteredListings.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    }
-
-    setListings(filteredListings)
-    setLoading(false)
-  }
+    const fetchListings = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/listings");
+        const data = await res.json();
+        console.log("Fetched listings:", data);
+        setListings(data);
+      } catch (err) {
+        console.error("Error fetching listings:", err);
+      }
+      setLoading(false);
+    };
+    fetchListings();
+  }, [filters]);
 
   const updateFilter = (key: string, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value }))

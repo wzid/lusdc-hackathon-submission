@@ -12,6 +12,8 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    IMGBB_API_KEY: z.string().min(1),
+    IMAGE_UPLOAD_API: z.string().url().min(1),
   },
 
   /**
@@ -31,7 +33,8 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     DATABASE_AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN,
     NODE_ENV: process.env.NODE_ENV,
-    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    IMGBB_API_KEY: process.env.IMGBB_API_KEY,
+    IMAGE_UPLOAD_API: process.env.IMAGE_UPLOAD_API,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
