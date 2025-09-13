@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,6 +16,9 @@ import { publishListingServerAction } from "./actions";
 
 export default function ListGearPage() {
   const [currentStep, setCurrentStep] = useState(1)
+  const [error, setError] = useState<string | null>(null)
+  const [showStepError, setShowStepError] = useState(false)
+  const router = useRouter()
 
   type GearFormData = {
     title: string
@@ -23,7 +27,7 @@ export default function ListGearPage() {
     location: string
     pricePerDay: string
     features: string[]
-    images: File[]
+    image: File | null
   }
 
   const [formData, setFormData] = useState<GearFormData>({
@@ -33,7 +37,7 @@ export default function ListGearPage() {
     location: "",
     pricePerDay: "",
     features: [] as string[],
-    images: [] as File[],
+    image: null,
   })
 
   const categories = [
@@ -54,35 +58,30 @@ export default function ListGearPage() {
   ]
 
   const publishListing = async (fd: GearFormData) => {
-    console.log("Publishing listing:", fd);
+    setError(null);
     try {
-      const base64Images = await Promise.all(
-        fd.images.map(
-          (file) =>
-            new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => {
-                const result = reader.result as string;
-                // Remove data URL prefix if present
-                const base64 = result?.split(",")[1] ?? result ?? "";
-                resolve(base64);
-              };
-              reader.onerror = () => reject(new Error(reader.error?.message ?? "File read error"));
-              reader.readAsDataURL(file);
-            })
-        )
-      );
-      // Call server action to upload images and insert into DB
+      if (!fd.image) throw new Error("Please upload an image.");
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          const base64 = result?.split(",")[1] ?? result ?? "";
+          resolve(base64);
+        };
+        reader.onerror = () => reject(new Error(reader.error?.message ?? "File read error"));
+        reader.readAsDataURL(fd.image);
+      });
       await publishListingServerAction({
-        ownerId: 1, // Placeholder, replace with actual user ID
-        typeId: categories.indexOf(fd.category) + 1, // Placeholder, replace with actual type ID based on category
+        typeId: categories.indexOf(fd.category) + 1,
         title: fd.title,
         description: fd.description,
         pricePerDay: parseInt(fd.pricePerDay) || 0,
-        base64Images,
+        base64Image: base64,
         location: fd.location,
       });
-    } catch (err) {
+      router.push("/search");
+    } catch (err: any) {
+      setError(err?.message || "Failed to publish listing.");
       console.error("Error uploading images or publishing listing:", err);
     }
   };
@@ -102,10 +101,10 @@ export default function ListGearPage() {
   };
 
   const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
+    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
     setFormData((prev) => ({
       ...prev,
-      images: files,
+      image: file,
     }));
   };
 
@@ -154,6 +153,11 @@ export default function ListGearPage() {
 
         {/* Form Content */}
         <div className="max-w-2xl mx-auto">
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-300">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -232,7 +236,6 @@ export default function ListGearPage() {
                       <p className="text-sm text-gray-500">Upload up to 10 high-quality photos</p>
                       <input
                         type="file"
-                        multiple
                         accept="image/*"
                         style={{ display: "none" }}
                         ref={fileInputRef}
@@ -241,13 +244,11 @@ export default function ListGearPage() {
                       <Button variant="outline" className="mt-4 bg-transparent" type="button" onClick={handleChooseFilesClick}>
                         Choose Files
                       </Button>
-                      {formData.images.length > 0 && (
+                      {formData.image && (
                         <div className="mt-4 flex flex-wrap gap-2 justify-center">
-                          {formData.images.map((file, idx) => (
-                            <span key={idx} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                              {file.name}
-                            </span>
-                          ))}
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            {formData.image.name}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -318,8 +319,7 @@ export default function ListGearPage() {
                     <CardContent className="pt-6">
                       <h3 className="font-semibold text-orange-800 mb-2">Ready to Go Live?</h3>
                       <p className="text-sm text-orange-700">
-                        Your listing will be reviewed and published within 24 hours. You&apos;ll receive an email
-                        confirmation once it&apos;s live.
+                        Your listing will be published immediately.
                       </p>
                     </CardContent>
                   </Card>
@@ -327,26 +327,48 @@ export default function ListGearPage() {
               )}
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between pt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                  disabled={currentStep === 1}
-                >
-                  Previous
-                </Button>
-                <Button
-                  onClick={async () => {
-                    if (currentStep === 4) {
-                      await publishListing(formData);
-                    } else {
-                      setCurrentStep(Math.min(4, currentStep + 1));
-                    }
-                  }}
-                  className="bg-orange-500 hover:bg-orange-600"
-                >
-                  {currentStep === 4 ? "Publish Listing" : "Next"}
-                </Button>
+              <div className="flex flex-col gap-2 pt-6">
+                <div className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                    disabled={currentStep === 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      setShowStepError(false);
+                      if (currentStep === 1 && (!formData.location || !formData.category)) {
+                        setShowStepError(true);
+                        return;
+                      }
+                      if (currentStep === 3 && !formData.pricePerDay) {
+                        setShowStepError(true);
+                        return;
+                      }
+                      if (currentStep === 4) {
+                        await publishListing(formData);
+                      } else {
+                        setCurrentStep(Math.min(4, currentStep + 1));
+                      }
+                    }}
+                    className="bg-orange-500 hover:bg-orange-600"
+                  >
+                    {currentStep === 4 ? "Publish Listing" : "Next"}
+                  </Button>
+                </div>
+                {/* Error messages for required fields, only after clicking Next */}
+                {showStepError && currentStep === 1 && (!formData.location || !formData.category) && (
+                  <div className="mt-2 text-sm text-red-600">
+                    Please enter both a location and category to continue.
+                  </div>
+                )}
+                {showStepError && currentStep === 3 && !formData.pricePerDay && (
+                  <div className="mt-2 text-sm text-red-600">
+                    Please enter a price per day to continue.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
