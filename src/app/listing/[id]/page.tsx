@@ -8,7 +8,7 @@ interface ListingPageProps {
 
 async function getListing(id: string): Promise<Listing | null> {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/listings/${id}`, {
+    const response = await fetch(`${process.env.NEXTAUTH_URL ?? 'http://localhost:3000'}/api/listings/${id}`, {
       cache: 'no-store' // Ensure we get fresh data
     })
     

@@ -14,9 +14,64 @@ interface ListingDetailsProps {
   listing: Listing
 }
 
+
+  const categories = [
+    "Dirt Bike",
+    "Electric Bike",
+    "",
+    "Road Bike",
+    "Mountain Bike",
+    "Snowboard",
+    "Canoe",
+    "Kayak",
+    "Moped",
+    "Electric Scooter",
+    "4-Wheel ATV",
+    "Paddleboard",
+    "Jet Ski",
+    "Skidoo",
+    "Snow Skis",
+  ]
+
+  const getIconForCategory = (categoryName: string | undefined) => {
+  switch (categoryName) {
+    case "Dirt Bike":
+      return "🏍️"
+    case "Electric Bike":
+      return "🚲"
+    case "Road Bike":
+      return "🚴"
+    case "Mountain Bike":
+      return "⛰️"
+    case "Snowboard":
+      return "🏂"
+    case "Canoe":
+      return "🛶"
+    case "Kayak":
+      return "🛶"
+    case "Moped":
+      return "🛵"
+    case "Electric Scooter":
+      return "🛴"
+    case "4-Wheel ATV":
+      return "🛻"
+    case "Paddleboard":
+      return "🏄"
+    case "Jet Ski":
+      return "🚤"
+    case "Skidoo":
+      return "❄️"
+    case "Snow Skis":
+      return "⛷️"
+    default:
+      return "❓"
+  }
+}
+
 export function ListingDetails({ listing }: ListingDetailsProps) {
-  const [selectedImage, setSelectedImage] = useState(0)
-  const images = listing.pictureList ? listing.pictureList : "/adventure-gear.jpg"
+  const image = listing.pictureList
+
+  const category = categories[Number(listing.typeId) - 1] ?? "WHAT"
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,17 +86,6 @@ export function ListingDetails({ listing }: ListingDetailsProps) {
                   Back to Search
                 </Link>
               </Button>
-              <Link href="/" className="text-2xl font-bold text-primary">
-                Things to Rent
-              </Link>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" asChild>
-                <Link href="/api/auth/login">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/list">List Your Gear</Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -55,32 +99,12 @@ export function ListingDetails({ listing }: ListingDetailsProps) {
             <div className="space-y-4">
               <div className="aspect-video relative overflow-hidden rounded-lg">
                 <Image
-                  src={images[selectedImage] || "/placeholder.svg"}
-                  alt={listing.title}
+                  src={image}
+                  alt={listing.name}
                   fill
                   className="object-cover"
                 />
               </div>
-              {images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto">
-                  {images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`flex-shrink-0 w-20 h-20 relative rounded-md overflow-hidden border-2 ${
-                        selectedImage === index ? "border-primary" : "border-transparent"
-                      }`}
-                    >
-                      <Image
-                        src={image || "/placeholder.svg"}
-                        alt={`${listing.title} ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Title and Basic Info */}
@@ -88,22 +112,18 @@ export function ListingDetails({ listing }: ListingDetailsProps) {
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <Badge variant="secondary">
-                    {listing.category?.icon} {listing.category?.name}
+                    {getIconForCategory(category)} {category}
                   </Badge>
-                  <h1 className="text-3xl font-bold">{listing.title}</h1>
+                  <h1 className="text-3xl font-bold">{listing.name}</h1>
                   <div className="flex items-center gap-4 text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
                       {listing.location}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      4.8 (12 reviews)
-                    </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold">${listing.price_per_day}</div>
+                  <div className="text-3xl font-bold">${listing.pricePerDay}</div>
                   <div className="text-muted-foreground">per day</div>
                 </div>
               </div>
@@ -118,25 +138,6 @@ export function ListingDetails({ listing }: ListingDetailsProps) {
                 <p className="text-muted-foreground leading-relaxed">{listing.description}</p>
               </CardContent>
             </Card>
-
-            {/* Features */}
-            {listing.features && listing.features.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>What's Included</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    {listing.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Owner Info */}
             <Card>

@@ -108,10 +108,6 @@ export function ListingCard({ listing, viewMode = "grid" }: ListingCardProps) {
                   <Calendar className="w-4 h-4" />
                   {listing.min_rental_days} day min
                 </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  4.8 (12 reviews)
-                </div>
               </div>
               <Button asChild>
                 <Link href={`/listing/${listing.id}`}>View Details</Link>
