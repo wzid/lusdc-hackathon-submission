@@ -37,7 +37,7 @@ export function ListingDetails({ listing }: ListingDetailsProps) {
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" asChild>
-                <Link href="/auth/login">Sign In</Link>
+                <Link href="/api/auth/login">Sign In</Link>
               </Button>
               <Button asChild>
                 <Link href="/list">List Your Gear</Link>
