@@ -1,206 +1,117 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DashboardStats } from "@/components/dashboard-stats"
-import { ListingManagement } from "@/components/listing-management"
-import { PayoutInfo } from "@/components/payout-info"
-import { RevenueChart } from "@/components/revenue-chart"
-import { mockListings, mockBookings, type Listing, type Booking } from "@/lib/mock-data"
 import Link from "next/link"
-import { Plus, Calendar, TrendingUp } from "lucide-react"
-
+import { Calendar } from "lucide-react"
+import { useSession } from "next-auth/react"
 export default function DashboardPage() {
-  const [listings, setListings] = useState<Listing[]>([])
-  const [bookings, setBookings] = useState<Booking[]>([])
+
+  const [listings, setListings] = useState<any[]>([])
+  const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
-    totalRevenue: 0,
-    activeListings: 0,
-    totalBookings: 0,
-    averageRating: 4.8,
-  })
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
-
-  const fetchDashboardData = async () => {
-    setLoading(true)
-
-    const userListings = mockListings.filter((listing) => listing.owner_id === "user-1")
-    const userBookings = mockBookings.filter((booking) => booking.owner_id === "user-1")
-
-    setListings(userListings)
-    setBookings(userBookings)
-
-    // Calculate stats from mock data
-    const activeListings = userListings.filter((l) => l.is_active).length
-    const totalBookings = userBookings.length
-    const totalRevenue = userBookings
-      .filter((b) => b.status === "completed")
-      .reduce((sum, booking) => sum + booking.total_amount, 0)
-
-    setStats({
-      totalRevenue,
-      activeListings,
-      totalBookings,
-      averageRating: 4.8,
-    })
-
-    setLoading(false)
-  }
+    if (status === "loading") return;
+    if (!session?.user?.id) {
+      setListings([]);
+      setBookings([]);
+      setLoading(false);
+      return;
+    }
+    const userId = session.user.id;
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      // Fetch listings owned by user
+      const listingsRes = await fetch(`/api/listings?ownerId=${userId}`);
+      const listingsData = listingsRes.ok ? await listingsRes.json() : [];
+      setListings(listingsData);
+      // Fetch bookings made by user
+      const bookingsRes = await fetch(`/api/bookings?userId=${userId}`);
+      const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
+      setBookings(bookingsData);
+      setLoading(false);
+    };
+    fetchDashboardData();
+  }, [session, status]);
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Manage your listings and track your earnings</p>
-          </div>
-          <Button asChild>
-            <Link href="/list">
-              <Plus className="w-4 h-4 mr-2" />
-              Create New Listing
-            </Link>
-          </Button>
-        </div>
-
-        {/* Stats Overview */}
-        <DashboardStats stats={stats} loading={loading} />
-
-        {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="listings">Listings</TabsTrigger>
-            <TabsTrigger value="bookings">Bookings</TabsTrigger>
-            <TabsTrigger value="payouts">Payouts</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Revenue Chart */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
-                    Revenue Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <RevenueChart bookings={bookings} />
-                </CardContent>
-              </Card>
-
-              {/* Recent Activity */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {bookings.slice(0, 5).map((booking) => (
-                    <div key={booking.id} className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="font-medium">{booking.listing?.title}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {booking.renter?.first_name} {booking.renter?.last_name}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">${booking.total_amount}</div>
-                        <Badge
-                          variant={
-                            booking.status === "completed"
-                              ? "default"
-                              : booking.status === "confirmed"
-                                ? "secondary"
-                                : booking.status === "pending"
-                                  ? "outline"
-                                  : "destructive"
-                          }
-                        >
-                          {booking.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  {bookings.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No bookings yet. Create your first listing to get started!
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="listings">
-            <ListingManagement listings={listings} onRefresh={fetchDashboardData} />
-          </TabsContent>
-
-          <TabsContent value="bookings">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  All Bookings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="space-y-2">
-                        <div className="font-medium">{booking.listing?.title}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {booking.renter?.first_name} {booking.renter?.last_name} •
-                          {new Date(booking.start_date).toLocaleDateString()} -{" "}
-                          {new Date(booking.end_date).toLocaleDateString()}
-                        </div>
-                        <div className="text-sm">
-                          {booking.total_days} days • ${booking.price_per_day}/day
-                        </div>
-                      </div>
-                      <div className="text-right space-y-2">
-                        <div className="text-xl font-bold">${booking.total_amount}</div>
-                        <Badge
-                          variant={
-                            booking.status === "completed"
-                              ? "default"
-                              : booking.status === "confirmed"
-                                ? "secondary"
-                                : booking.status === "pending"
-                                  ? "outline"
-                                  : "destructive"
-                          }
-                        >
-                          {booking.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  {bookings.length === 0 && (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <h3 className="text-lg font-medium mb-2">No bookings yet</h3>
-                      <p>Your bookings will appear here once customers start renting your gear.</p>
-                    </div>
-                  )}
+        {/* Listings Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Your Listings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {listings.map((listing) => (
+                <div key={listing.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-2">
+                    <div className="font-medium">{listing.name}</div>
+                    <div className="text-sm text-muted-foreground">{listing.location}</div>
+                  </div>
+                  <Link href={`/listing/${listing.id}`}>View</Link>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              ))}
+              {listings.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No listings yet. Create your first listing to get started!
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-          <TabsContent value="payouts">
-            <PayoutInfo bookings={bookings} />
-          </TabsContent>
-        </Tabs>
+        {/* Bookings Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Bookings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {bookings.map((booking) => (
+                <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex gap-4 items-center">
+                    {booking.pictureList ? (
+                      <img
+                        src={booking.pictureList}
+                        alt={booking.itemName ?? "Listing image"}
+                        className="w-20 h-16 object-cover rounded-lg flex-shrink-0"
+                      />
+                    ) : (
+                      <img
+                        src="/placeholder.jpg"
+                        alt="Placeholder"
+                        className="w-20 h-16 object-cover rounded-lg flex-shrink-0"
+                      />
+                    )}
+                    <div className="space-y-2">
+                      <div className="font-medium">{booking.itemName ?? "Unknown item"}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {booking.startDate && booking.endDate ? (
+                          <>
+                            {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}
+                          </>
+                        ) : "Dates unknown"}
+                      </div>
+                      <div className="text-sm">Status: {booking.status}</div>
+                    </div>
+                  </div>
+                  <Link href={`/booking/${booking.id}/confirmation`}>View</Link>
+                </div>
+              ))}
+              {bookings.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No bookings yet. Book something to get started!
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

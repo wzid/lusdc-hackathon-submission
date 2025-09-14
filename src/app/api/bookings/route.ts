@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "~/server/db";
-import { bookings } from "~/server/db/schema";
+import { bookings, items } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "~/lib/auth";
 
@@ -16,7 +17,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  console.log("HELLLLOOOO")
 
   const itemIdNum = Number(itemId);
   // Type guard for date conversion
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     startDate: startDateObj,
     endDate: endDateObj,
     totalPrice,
-    status: "pending",
+    status: "Awaiting Contact",
   };
   console.log("Booking insert values:", bookingValues);
   let booking;
@@ -64,6 +64,34 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  // Optionally: implement fetching bookings for a user or by ID
-  return NextResponse.json({ message: "Not implemented" }, { status: 501 });
+  // Get userId from query string or session
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get("userId");
+  if (!userId) {
+    return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  }
+  try {
+    // Fetch bookings for this user and join item info
+    const userBookings = await db
+      .select({
+        id: bookings.id,
+        itemId: bookings.itemId,
+        renterId: bookings.renterId,
+        startDate: bookings.startDate,
+        endDate: bookings.endDate,
+        totalPrice: bookings.totalPrice,
+        status: bookings.status,
+        createdAt: bookings.createdAt,
+        itemName: items.name,
+        pictureList: items.pictureList
+      })
+      .from(bookings)
+      .leftJoin(items, eq(bookings.itemId, items.id))
+      .where(eq(bookings.renterId, userId));
+    return NextResponse.json(userBookings);
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
 }
+

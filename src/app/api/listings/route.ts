@@ -11,10 +11,15 @@ export async function GET(request: Request) {
   const priceMin = Number(searchParams.get("priceMin")) ?? 0;
   const priceMax = Number(searchParams.get("priceMax")) ?? 200;
   const sortBy = searchParams.get("sortBy") ?? "newest";
+  const ownerId = searchParams.get("ownerId") ?? "";
 
   // Fetch all listings
-  const allListings = await db.select().from(items);
-  let filteredListings = allListings;
+  let filteredListings = await db.select().from(items);
+  if (ownerId) {
+    console.log("Filtering listings for ownerId:", ownerId);
+    filteredListings = filteredListings.filter((listing) => String(listing.ownerId) === String(ownerId));
+    return NextResponse.json(filteredListings);
+  }
 
   if (search) {
     filteredListings = filteredListings.filter(
