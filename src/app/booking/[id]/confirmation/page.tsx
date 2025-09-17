@@ -9,29 +9,15 @@ import Link from "next/link"
 import { CheckCircle, Calendar, MapPin, User, Download, MessageCircle } from "lucide-react"
 import { format } from "date-fns"
 
-interface ConfirmationPageProps {
-  params: Promise<{ id: string }> | { id: string }
-}
 
-export default function ConfirmationPage({ params }: ConfirmationPageProps) {
+export default function ConfirmationPage({ params }: { params: { id: string } }) {
   const [booking, setBooking] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  let id: string
-  if (typeof params === "object" && "then" in params) {
-    // If params is a Promise
-    useEffect(() => {
-      (async () => {
-        const resolved = await params
-        id = resolved.id
-        fetchBooking(id)
-      })()
-    }, [params])
-  } else {
-    id = (params as { id: string }).id
-    useEffect(() => {
-      fetchBooking(id)
-    }, [id])
-  }
+  const id = params.id
+  useEffect(() => {
+    fetchBooking(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
   const fetchBooking = async (bookingId: string) => {
     try {
