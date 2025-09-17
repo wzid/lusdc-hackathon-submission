@@ -27,16 +27,6 @@ async function getListing(id: string): Promise<Listing | null> {
   }
 }
 
-
-  const { id } = params
-  const listing = await getListing(id)
-
-  if (!listing) {
-    notFound()
-  }
-
-  return <ListingDetails listing={listing} />
-}
 export default async function ListingPage({ params }: { params: { id: string } }) {
   const { id } = params
   const listing = await getListing(id)
