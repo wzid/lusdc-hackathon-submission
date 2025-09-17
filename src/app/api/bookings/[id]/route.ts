@@ -4,9 +4,14 @@ import { db } from "~/server/db";
 import { bookings, items, users } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const awaitedParams = await params;
-  const bookingId = Number(awaitedParams.id);
+
+export async function GET(request: Request) {
+  // Extract booking ID from the URL
+  const url = new URL(request.url);
+  const idRegex = /bookings\/(.+?)\//;
+  const idMatch = idRegex.exec(url.pathname);
+  const bookingIdStr = idMatch ? idMatch[1] : null;
+  const bookingId = Number(bookingIdStr);
   if (!bookingId) {
     return NextResponse.json({ error: "Invalid booking ID" }, { status: 400 });
   }
@@ -30,8 +35,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 
   // Ensure startDate and endDate are returned as UNIX timestamps (number)
-  let startDateNum = booking?.startDate instanceof Date ? Math.floor(booking.startDate.getTime() / 1000) : Number(booking?.startDate);
-  let endDateNum = booking?.endDate instanceof Date ? Math.floor(booking.endDate.getTime() / 1000) : Number(booking?.endDate);
+  const startDateNum = booking?.startDate instanceof Date ? Math.floor(booking.startDate.getTime() / 1000) : Number(booking?.startDate);
+  const endDateNum = booking?.endDate instanceof Date ? Math.floor(booking.endDate.getTime() / 1000) : Number(booking?.endDate);
   return NextResponse.json({
     ...booking,
     startDate: startDateNum,

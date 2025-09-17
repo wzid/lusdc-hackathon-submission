@@ -30,6 +30,7 @@ export function AuthNav() {
               {session.user?.image ? (
                 <img
                   src={session.user.image}
+                  referrerPolicy="no-referrer"
                   alt={session.user.name || "User"}
                   className="h-8 w-8 rounded-full"
                 />
