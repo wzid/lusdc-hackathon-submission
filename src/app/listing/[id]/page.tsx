@@ -2,8 +2,9 @@ import { notFound } from "next/navigation"
 import { ListingDetails } from "@/components/listing-details"
 import type { Listing } from "@/lib/types"
 
+
 interface ListingPageProps {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }
 
 async function getListing(id: string): Promise<Listing | null> {
@@ -26,8 +27,18 @@ async function getListing(id: string): Promise<Listing | null> {
   }
 }
 
-export default async function ListingPage({ params }: ListingPageProps) {
-  const { id } = await params
+
+  const { id } = params
+  const listing = await getListing(id)
+
+  if (!listing) {
+    notFound()
+  }
+
+  return <ListingDetails listing={listing} />
+}
+export default async function ListingPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const listing = await getListing(id)
 
   if (!listing) {

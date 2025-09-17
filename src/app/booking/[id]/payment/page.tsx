@@ -14,11 +14,9 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, CreditCard, Shield, Calendar, MapPin } from "lucide-react"
 import { format } from "date-fns"
 
-interface PaymentPageProps {
-  params: Promise<{ id: string }>
-}
 
-export default function PaymentPage({ params }: PaymentPageProps) {
+
+export default function PaymentPage({ params }: { params: { id: string } }) {
   interface BookingData {
     id: number
     itemId: number
@@ -43,11 +41,10 @@ export default function PaymentPage({ params }: PaymentPageProps) {
   const router = useRouter()
 
   useEffect(() => {
-    fetchBooking()
-  }, [])
+    fetchBooking(params.id)
+  }, [params.id])
 
-  const fetchBooking = async () => {
-    const { id } = await params
+  const fetchBooking = async (id: string) => {
     try {
       const res = await fetch(`/api/bookings/${id}`)
       const data = await res.json()
