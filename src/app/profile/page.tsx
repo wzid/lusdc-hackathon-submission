@@ -9,10 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { mockUser, mockProfiles, type Profile } from "@/lib/mock-data"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { User, Settings, Shield, CreditCard, LogOut } from "lucide-react"
+import type { Profile } from "next-auth"
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -26,25 +25,6 @@ export default function ProfilePage() {
   })
 
   const router = useRouter()
-
-  useEffect(() => {
-    fetchProfile()
-  }, [])
-
-  const fetchProfile = async () => {
-    const userProfile = mockProfiles.find((p) => p.id === mockUser.id)
-
-    if (userProfile) {
-      setProfile(userProfile)
-      setFormData({
-        first_name: userProfile.first_name || "",
-        last_name: userProfile.last_name || "",
-        phone: userProfile.phone || "",
-        bio: userProfile.bio || "",
-      })
-    }
-    setLoading(false)
-  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()

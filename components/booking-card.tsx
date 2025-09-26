@@ -91,7 +91,6 @@ export function BookingCard({ listing }: BookingCardProps) {
   router.push(`/booking/${data.bookingId}/confirmation`);
     } catch (error: any) {
       console.error("Booking error:", error);
-      console.log("Error details:", data);
       setError(error.message || "Failed to create booking. Please try again.");
     } finally {
       setIsLoading(false);

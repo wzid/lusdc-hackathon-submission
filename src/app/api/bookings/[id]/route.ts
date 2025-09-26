@@ -8,13 +8,10 @@ import { eq } from "drizzle-orm";
 export async function GET(request: Request) {
   // Extract booking ID from the URL
   const url = new URL(request.url);
-  const idRegex = /bookings\/(.+?)\//;
-  const idMatch = idRegex.exec(url.pathname);
-  const bookingIdStr = idMatch ? idMatch[1] : null;
-  const bookingId = Number(bookingIdStr);
-  if (!bookingId) {
-    return NextResponse.json({ error: "Invalid booking ID" }, { status: 400 });
-  }
+const bookingId = Number(url.pathname.split("/").pop());
+if (isNaN(bookingId)) {
+  return NextResponse.json({ error: "Invalid booking ID" }, { status: 400 });
+}
 
   // Fetch booking
   const bookingArr = await db.select().from(bookings).where(eq(bookings.id, bookingId));

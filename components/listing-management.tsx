@@ -12,11 +12,11 @@ import { Edit, Eye, MoreHorizontal, MapPin } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 interface ListingManagementProps {
-  listings: Listing[]
+  listingProp: Listing[]
   onRefresh: () => void
 }
 
-export function ListingManagement({ listings, onRefresh }: ListingManagementProps) {
+export function ListingManagement({ listingProp, onRefresh }: ListingManagementProps) {
   const [updatingListing, setUpdatingListing] = useState<string | null>(null)
 
   const toggleListingStatus = async (listingId: string, isActive: boolean) => {
@@ -40,7 +40,7 @@ export function ListingManagement({ listings, onRefresh }: ListingManagementProp
         </Button>
       </div>
 
-      {listings.length === 0 ? (
+      {listingProp.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <div className="text-6xl mb-4">📦</div>
@@ -55,15 +55,15 @@ export function ListingManagement({ listings, onRefresh }: ListingManagementProp
         </Card>
       ) : (
         <div className="grid gap-6">
-          {listings.map((listing) => (
+          {listingProp.map((listing) => (
             <Card key={listing.id}>
               <CardContent className="p-6">
                 <div className="flex gap-6">
                   {/* Image */}
                   <div className="w-32 h-24 relative flex-shrink-0 rounded-lg overflow-hidden">
                     <Image
-                      src={listing.images?.[0] || "/adventure-gear.jpg"}
-                      alt={listing.title}
+                      src={listing.pictureList ?? "/adventure-gear.jpg"}
+                      alt={listing.name}
                       fill
                       className="object-cover"
                     />
@@ -74,7 +74,7 @@ export function ListingManagement({ listings, onRefresh }: ListingManagementProp
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold">{listing.title}</h3>
+                          <h3 className="text-lg font-semibold">{listing.name}</h3>
                           <Badge variant="secondary">
                             {listing.category?.icon} {listing.category?.name}
                           </Badge>
@@ -86,7 +86,7 @@ export function ListingManagement({ listings, onRefresh }: ListingManagementProp
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="text-right">
-                          <div className="text-xl font-bold">${listing.price_per_day}</div>
+                          <div className="text-xl font-bold">${listing.pricePerDay}</div>
                           <div className="text-sm text-muted-foreground">per day</div>
                         </div>
                         <DropdownMenu>

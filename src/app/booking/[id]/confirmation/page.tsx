@@ -8,16 +8,27 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { CheckCircle, Calendar, MapPin, User, Download, MessageCircle } from "lucide-react"
 import { format } from "date-fns"
+import React from "react"
+import type { Booking } from "@/lib/types"
 
 
-export default function ConfirmationPage({ params }: { params: { id: string } }) {
+export default function ConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
   const [booking, setBooking] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const id = params.id
+  const [id, setId] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchBooking(id)
+    params.then(unwrappedParams => {
+      setId(unwrappedParams.id);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (id) {
+      fetchBooking(id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
+  }, [id]);
 
   const fetchBooking = async (bookingId: string) => {
     try {

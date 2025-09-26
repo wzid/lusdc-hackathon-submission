@@ -5,10 +5,11 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
   try {
-    const { id } = params;
     
     // Convert string ID to number since the database uses integer IDs
     const numericId = parseInt(id, 10);

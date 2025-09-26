@@ -51,8 +51,8 @@ export function SearchFilters({ categories, filters, onFilterChange, onClearFilt
     filters.search,
     filters.category,
     filters.location,
-    filters.features?.length > 0,
-    filters.priceRange[0] > 0 || filters.priceRange[1] < 200,
+(filters.features?.length ?? 0) > 0,
+(filters.priceRange?.[0] ?? 0) > 0 || (filters.priceRange?.[1] ?? 200) < 200,
   ].filter(Boolean).length
 
   return (
