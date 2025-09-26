@@ -79,7 +79,7 @@ export default function ListGearPage() {
           resolve(base64);
         };
         reader.onerror = () => reject(new Error(reader.error?.message ?? "File read error"));
-        reader.readAsDataURL(fd.image);
+        reader.readAsDataURL(fd.image as Blob);
       });
       await publishListingServerAction({
         typeId: categories.indexOf(fd.category) + 1,

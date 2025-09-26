@@ -63,14 +63,14 @@ export default function SearchPage() {
     const fetchListings = async () => {
       setLoading(true);
       try {
-        const params = new URLSearchParams({
-          search: filters.search,
-          category: (filters.category == "all" || filters.category == "") ? 0 : REAL_categories.indexOf(filters.category) + 1,
-          location: filters.location,
-          priceMin: String(filters.priceRange[0]),
-          priceMax: String(filters.priceRange[1]),
-          sortBy: filters.sortBy,
-        });
+const params = new URLSearchParams({
+  search: filters.search,
+  category: (filters.category == "all" || filters.category == "") ? "0" : String(REAL_categories.indexOf(filters.category) + 1),
+  location: filters.location,
+  priceMin: String(filters.priceRange[0]),
+  priceMax: String(filters.priceRange[1]),
+  sortBy: filters.sortBy,
+});
         const res = await fetch(`/api/listings?${params.toString()}`);
         const data = await res.json();
         console.log("Fetched listings:", data);

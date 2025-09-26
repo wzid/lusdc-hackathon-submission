@@ -1,5 +1,16 @@
-import { sqliteTable, AnySQLiteColumn, uniqueIndex, integer, index, foreignKey, text } from "drizzle-orm/sqlite-core"
+import { sqliteTable, uniqueIndex, integer, index, text } from "drizzle-orm/sqlite-core"
   import { sql } from "drizzle-orm"
+
+export const user = sqliteTable("user", {
+  id: text().primaryKey().notNull(),
+  name: text().notNull(),
+  email: text().notNull(),
+  emailVerified: integer(),
+  image: text(),
+  contactInfo: text({ length: 512 }),
+  createdAt: integer().default(sql`(unixepoch())`).notNull()
+});
+
 
 export const thingsToRentItemType = sqliteTable("things-to-rent_item_type", {
 	id: integer().primaryKey({ autoIncrement: true }).notNull(),
