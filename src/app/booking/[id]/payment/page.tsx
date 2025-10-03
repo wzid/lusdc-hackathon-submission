@@ -16,7 +16,7 @@ import { format } from "date-fns"
 
 
 
-export default function PaymentPage({ params }: { params: { id: string } }) {
+export default function PaymentPage({ params }: { params: Promise<{ id: string }> }) {
   interface BookingData {
     id: number
     itemId: number
@@ -41,8 +41,12 @@ export default function PaymentPage({ params }: { params: { id: string } }) {
   const router = useRouter()
 
   useEffect(() => {
-    fetchBooking(params.id)
-  }, [params.id])
+    const loadBooking = async () => {
+      const resolvedParams = await params
+      fetchBooking(resolvedParams.id)
+    }
+    loadBooking()
+  }, [params])
 
   const fetchBooking = async (id: string) => {
     try {

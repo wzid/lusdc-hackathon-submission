@@ -4,7 +4,7 @@ import type { Listing } from "@/lib/types"
 
 
 interface ListingPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 async function getListing(id: string): Promise<Listing | null> {
@@ -27,8 +27,8 @@ async function getListing(id: string): Promise<Listing | null> {
   }
 }
 
-export default async function ListingPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const listing = await getListing(id)
 
   if (!listing) {
